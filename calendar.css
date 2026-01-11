@@ -8,15 +8,19 @@ body::before {
   white-space: pre;
   font-family: "Courier New", Courier, monospace;
   font-size: 16px;
+  font-weight: bold;
   line-height: 1.8;
-  color: #fff;
+  color: #f8f8f2;
   padding: 25px;
-  background: rgba(0, 0, 0, 0.5);
-  backdrop-filter: blur(10px);
+  background: #282a36;
+  border: 2px solid #6272a4;
   border-radius: 12px;
   text-align: center;
-  background-image: radial-gradient(circle, rgba(255, 255, 255, 0.3) 50%, transparent 55%);
+  box-shadow: 10px 10px 20px rgba(0,0,0,0.5);
+
+  /* Dracula Highlight */
+  background-image: radial-gradient(circle, #ff79c6 55%, transparent 60%);
   background-repeat: no-repeat;
-  background-size: 35px 35px;
-  background-position: 23px 156px;
+  background-size: 32px 32px;
+  background-position: 24.0px 157.6px;
 }
