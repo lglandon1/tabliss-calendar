@@ -6,11 +6,13 @@ def generate_css():
     now = datetime.datetime.now()
     year, month, day = now.year, now.month, now.day
     
-    # 1. Fetch Holidays for both US and Kuwait
+    # 1. Fetch Holidays (US and Kuwait)
     us_hols = holidays.US(years=year)
-    kw_hols = holidays.KW(years=year) # Kuwait Country Code
+    try:
+        kw_hols = holidays.CountryHoliday('KW', years=year)
+    except:
+        kw_hols = {} # Fallback if library version differs
     
-    # Check if today is a holiday in either country
     current_date = datetime.date(year, month, day)
     holiday_name = us_hols.get(current_date) or kw_hols.get(current_date)
     
@@ -20,7 +22,8 @@ def generate_css():
     lines = cal_str.splitlines()
     
     header = lines[0].strip().upper()
-    days_header = " S  M  T  W  T  F  S"
+    # Highlighting F and S as weekends visually in the header
+    days_header = " S  M  T  W  T  [F] [S]" 
     body_lines = [l for l in lines[2:] if l.strip()]
     body = " \\A ".join(body_lines)
     
@@ -28,24 +31,20 @@ def generate_css():
     full_content = f"{header} \\A {days_header} \\A {body} {footer}"
 
     # 3. FIX HIGHLIGHT MATH
-    # Find weekday of the 1st (Monday=0, Sunday=6)
     first_weekday = datetime.date(year, month, 1).weekday()
-    # Convert to Sunday=0 for our grid
     offset = (first_weekday + 1) % 7
     
-    # Calculate grid position
     col = (day + offset - 1) % 7
     row = (day + offset - 1) // 7
 
     # Dracula Colors
     background = "#282a36"
-    current_line = "#44475a"
     foreground = "#f8f8f2"
     comment = "#6272a4"
     pink = "#ff79c6"
 
-    # Coordinates: 25px padding + slightly adjusted spacing
-    h_pos = 24 + (col * 29.3)
+    # Precise spacing for Courier New 16px
+    h_pos = 23 + (col * 29.5)
     v_pos = 100 + (row * 28.8)
 
     css = f"""
@@ -54,24 +53,22 @@ body::before {{
   position: fixed;
   top: 40px;
   right: 40px;
-  z-index: 999;
+  z-index: 9999;
   white-space: pre;
-  font-family: "Courier New", Courier, monospace;
+  font-family: 'Courier New', Courier, monospace;
   font-size: 16px;
   font-weight: bold;
   line-height: 1.8;
   color: {foreground};
   padding: 25px;
-  background: {background};
-  border: 2px solid {comment};
+  background-color: {background};
+  border: 3px solid {comment};
   border-radius: 12px;
   text-align: center;
-  box-shadow: 10px 10px 20px rgba(0,0,0,0.5);
-
-  /* Dracula Highlight */
-  background-image: radial-gradient(circle, {pink} 55%, transparent 60%);
+  box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+  background-image: radial-gradient(circle, {pink} 50%, transparent 55%);
   background-repeat: no-repeat;
-  background-size: 32px 32px;
+  background-size: 34px 34px;
   background-position: {h_pos}px {v_pos}px;
 }}"""
     
