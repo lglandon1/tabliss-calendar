@@ -1,47 +1,42 @@
 import datetime
 import calendar
+import holidays  # You'll need this in your requirements/action
 
-# --- CONFIGURATION ---
-# Add your custom holidays here (Month, Day)
-HOLIDAYS = {
-    (1, 1): "New Year's Day",
-    (1, 19): "MLK Day",
-    (2, 14): "Valentine's",
-    # Add more...
-}
+def generate_css():
+    # Setup Date
+    now = datetime.datetime.now()
+    year, month, day = now.year, now.month, now.day
+    
+    # Get Holidays for US (Change 'US' to your country code)
+    uk_holidays = holidays.US(years=year)
+    today_holiday = uk_holidays.get(datetime.date(year, month, day))
+    
+    # Generate Calendar Grid (Sunday start)
+    cal_obj = calendar.TextCalendar(calendar.SUNDAY)
+    cal_str = cal_obj.formatmonth(year, month)
+    lines = cal_str.splitlines()
+    
+    # Format Content
+    header = lines[0].strip().upper()
+    days_header = " S  M  T  W  T  F  S"
+    body = " \\A ".join(lines[2:])
+    
+    # Add Holiday Text if it exists
+    footer = f"\\A\\A-- {today_holiday} --" if today_holiday else ""
+    full_content = f"{header} \\A {days_header} \\A {body} {footer}"
 
-now = datetime.datetime.now()
-year, month, day = now.year, now.month, now.day
+    # Calculate Highlight Position
+    # Sunday = 0, Saturday = 6
+    first_day_weekday = (datetime.date(year, month, 1).weekday() + 1) % 7
+    col = (day + first_day_weekday - 1) % 7
+    row = (day + first_day_weekday - 1) // 7
 
-# Generate the calendar string
-cal_obj = calendar.TextCalendar(calendar.SUNDAY)
-cal_str = cal_obj.formatmonth(year, month)
-lines = cal_str.splitlines()
+    h_pos = 23 + (col * 29)
+    v_pos = 98 + (row * 29)
 
-# Title and Header
-header = lines[0].strip().upper()
-days_header = " S  M  T  W  T  F  S"
-body_lines = lines[2:]
-
-# Format rows with \A for CSS line breaks
-content = f"{header} \\A {days_header}"
-for line in body_lines:
-    content += f" \\A {line}"
-
-# Calculate Highlight Position
-# (Base coordinates: 23px horizontal, 98px vertical for first row)
-first_day_weekday = datetime.date(year, month, 1).weekday() 
-# Adjusting for Sunday start: (weekday + 1) % 7
-col = (datetime.date(year, month, day).weekday() + 1) % 7
-row = (day + (datetime.date(year, month, 1).weekday() + 1) % 7 - 1) // 7
-
-h_pos = 23 + (col * 29)
-v_pos = 98 + (row * 29)
-
-# Build the CSS
-css_content = f"""
+    css = f"""
 body::before {{
-  content: "{content}";
+  content: "{full_content}";
   position: fixed;
   top: 40px;
   right: 40px;
@@ -60,8 +55,10 @@ body::before {{
   background-repeat: no-repeat;
   background-size: 35px 35px;
   background-position: {h_pos}px {v_pos}px;
-}}
-"""
+}}"""
+    
+    with open("calendar.css", "w") as f:
+        f.write(css)
 
-with open("calendar.css", "w") as f:
-    f.write(css_content)
+if __name__ == "__main__":
+    generate_css()
