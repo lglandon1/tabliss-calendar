@@ -9,7 +9,7 @@ def generate_css():
     
     # --- CONFIGURATION ---
     # Colors (Dracula Theme)
-    C_BG = "#282a36"       # Background
+    C_BG = "#282a36"       # Solid color here; opacity is handled by the CSS below
     C_FG = "#f8f8f2"       # Text
     C_PINK = "#ff79c6"     # Today Highlight
     C_PURPLE = "#bd93f9"   # Holiday Text/Shading
@@ -21,10 +21,7 @@ def generate_css():
     kw_hols = holidays.CountryHoliday('KW', years=year)
     
     # --- SVG GENERATION ---
-    # Canvas Size
     width, height = 300, 340
-    
-    # Start SVG String
     svg = [f'<svg xmlns="http://www.w3.org/2000/svg" width="{width}" height="{height}">']
     
     # 1. Main Card Background
@@ -37,69 +34,52 @@ def generate_css():
     # 3. Days Header (S M T W T F S)
     days = ["S", "M", "T", "W", "T", "F", "S"]
     start_x, start_y = 30, 80
-    col_width = 40
-    row_height = 40
+    col_width, row_height = 40, 40
     
     for i, d in enumerate(days):
         x = start_x + (i * col_width)
-        # Highlight Friday/Saturday in header slightly
         color = C_PURPLE if i in [5, 6] else C_FG 
         svg.append(f'<text x="{x}" y="{start_y}" font-family="Courier New, monospace" font-size="16" font-weight="bold" fill="{color}" text-anchor="middle">{d}</text>')
     
     # 4. Calendar Grid
     cal = calendar.Calendar(firstweekday=6) # Sunday start
     month_days = cal.monthdayscalendar(year, month)
-    
     grid_start_y = 120
     
     for r_idx, week in enumerate(month_days):
         for c_idx, d in enumerate(week):
-            if d == 0: continue # Empty day
+            if d == 0: continue
             
-            # Coordinates for this cell
-            cx = start_x + (c_idx * col_width)
-            cy = grid_start_y + (r_idx * row_height)
-            
-            # Check logic
+            cx, cy = start_x + (c_idx * col_width), grid_start_y + (r_idx * row_height)
             current_date = datetime.date(year, month, d)
             is_today = (d == day)
-            is_weekend = (c_idx == 5 or c_idx == 6) # Friday (5) or Saturday (6)
-            
-            # Holiday Name Check
+            is_weekend = (c_idx == 5 or c_idx == 6)
             h_name = us_hols.get(current_date) or kw_hols.get(current_date)
             
-            # --- LAYERS ---
-            
-            # Layer A: Shading (Weekend or Holiday)
             if h_name or is_weekend:
                 fill = C_PURPLE if h_name else C_CYAN_LOW
                 opacity = "0.4" if h_name else "1"
-                # Draw rect centered on the number
                 svg.append(f'<rect x="{cx-18}" y="{cy-18}" width="36" height="30" rx="6" fill="{fill}" fill-opacity="{opacity}" />')
 
-            # Layer B: TODAY Highlight (Pink Circle) - Draws ON TOP of shading
             if is_today:
                 svg.append(f'<circle cx="{cx}" cy="{cy-5}" r="16" fill="{C_PINK}" />')
             
-            # Layer C: The Number
-            # If it's today, make text dark (so it pops on pink). Else white.
             text_color = "#282a36" if is_today else C_FG
             svg.append(f'<text x="{cx}" y="{cy}" font-family="Courier New, monospace" font-size="16" font-weight="bold" fill="{text_color}" text-anchor="middle">{d}</text>')
 
-    # 5. Footer (Holiday Name)
     today_holiday = us_hols.get(datetime.date(year, month, day)) or kw_hols.get(datetime.date(year, month, day))
     if today_holiday:
         svg.append(f'<text x="{width/2}" y="{height-20}" font-family="Courier New, monospace" font-size="12" fill="{C_PURPLE}" text-anchor="middle">-- {today_holiday} --</text>')
 
     svg.append('</svg>')
     
-    # --- OUTPUT ---
+    # --- OUTPUT & ENCODING ---
     svg_content = "".join(svg)
-    # Encode to Base64 to embed directly in CSS
     b64_svg = base64.b64encode(svg_content.encode('utf-8')).decode('utf-8')
     
+    # --- CSS WITH FADE & HOVER ---
     css = f"""
-/* Generated SVG Calendar */
+/* Faded SVG Calendar with Hover Effect */
 body::before {{
   content: "";
   display: block;
@@ -112,12 +92,21 @@ body::before {{
   background-image: url("data:image/svg+xml;base64,{b64_svg}");
   background-repeat: no-repeat;
   filter: drop-shadow(0 10px 20px rgba(0,0,0,0.5));
+  
+  /* The Fade Settings */
+  opacity: 0.6;                 /* 60% visibility */
+  transition: opacity 0.4s ease; /* Smooth fade in/out */
+}}
+
+/* Brighten on mouse hover */
+body::before:hover {{
+  opacity: 1.0;
 }}
 """
     
     with open("calendar.css", "w") as f:
         f.write(css)
-    print("Success: SVG calendar generated.")
+    print("Success: Faded SVG calendar generated.")
 
 if __name__ == "__main__":
     generate_css()
