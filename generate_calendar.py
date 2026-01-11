@@ -6,36 +6,47 @@ def generate_css():
     now = datetime.datetime.now()
     year, month, day = now.year, now.month, now.day
     
-    # Get Holidays
-    us_holidays = holidays.US(years=year)
-    today_holiday = us_holidays.get(datetime.date(year, month, day))
+    # 1. Fetch Holidays for both US and Kuwait
+    us_hols = holidays.US(years=year)
+    kw_hols = holidays.KW(years=year) # Kuwait Country Code
     
-    # Generate Grid
+    # Check if today is a holiday in either country
+    current_date = datetime.date(year, month, day)
+    holiday_name = us_hols.get(current_date) or kw_hols.get(current_date)
+    
+    # 2. Generate Calendar Grid (Sunday start)
     cal_obj = calendar.TextCalendar(calendar.SUNDAY)
     cal_str = cal_obj.formatmonth(year, month)
     lines = cal_str.splitlines()
     
     header = lines[0].strip().upper()
     days_header = " S  M  T  W  T  F  S"
-    # Filter out empty lines and format for CSS
     body_lines = [l for l in lines[2:] if l.strip()]
     body = " \\A ".join(body_lines)
     
-    footer = f"\\A\\A-- {today_holiday} --" if today_holiday else ""
+    footer = f"\\A\\A-- {holiday_name} --" if holiday_name else ""
     full_content = f"{header} \\A {days_header} \\A {body} {footer}"
 
-    # Calculate Grid Positioning
-    # Sunday is 6 in datetime.weekday(), so (wd + 1) % 7 makes Sun=0
-    first_day_of_month = datetime.date(year, month, 1)
-    start_col = (first_day_of_month.weekday() + 1) % 7
+    # 3. FIX HIGHLIGHT MATH
+    # Find weekday of the 1st (Monday=0, Sunday=6)
+    first_weekday = datetime.date(year, month, 1).weekday()
+    # Convert to Sunday=0 for our grid
+    offset = (first_weekday + 1) % 7
     
-    col = (day + start_col - 1) % 7
-    row = (day + start_col - 1) // 7
+    # Calculate grid position
+    col = (day + offset - 1) % 7
+    row = (day + offset - 1) // 7
 
-    # Horizontal: 23px is left edge, 29px per column
-    # Vertical: 98px is first row of numbers, 29px per row
-    h_pos = 23 + (col * 29)
-    v_pos = 98 + (row * 29)
+    # Dracula Colors
+    background = "#282a36"
+    current_line = "#44475a"
+    foreground = "#f8f8f2"
+    comment = "#6272a4"
+    pink = "#ff79c6"
+
+    # Coordinates: 25px padding + slightly adjusted spacing
+    h_pos = 24 + (col * 29.3)
+    v_pos = 100 + (row * 28.8)
 
     css = f"""
 body::before {{
@@ -47,16 +58,20 @@ body::before {{
   white-space: pre;
   font-family: "Courier New", Courier, monospace;
   font-size: 16px;
+  font-weight: bold;
   line-height: 1.8;
-  color: #fff;
+  color: {foreground};
   padding: 25px;
-  background: rgba(0, 0, 0, 0.5);
-  backdrop-filter: blur(10px);
+  background: {background};
+  border: 2px solid {comment};
   border-radius: 12px;
   text-align: center;
-  background-image: radial-gradient(circle, rgba(255, 255, 255, 0.3) 50%, transparent 55%);
+  box-shadow: 10px 10px 20px rgba(0,0,0,0.5);
+
+  /* Dracula Highlight */
+  background-image: radial-gradient(circle, {pink} 55%, transparent 60%);
   background-repeat: no-repeat;
-  background-size: 35px 35px;
+  background-size: 32px 32px;
   background-position: {h_pos}px {v_pos}px;
 }}"""
     
