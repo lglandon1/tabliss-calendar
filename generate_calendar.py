@@ -1,36 +1,39 @@
 import datetime
 import calendar
-import holidays  # You'll need this in your requirements/action
+import holidays
 
 def generate_css():
-    # Setup Date
     now = datetime.datetime.now()
     year, month, day = now.year, now.month, now.day
     
-    # Get Holidays for US (Change 'US' to your country code)
-    uk_holidays = holidays.US(years=year)
-    today_holiday = uk_holidays.get(datetime.date(year, month, day))
+    # Get Holidays
+    us_holidays = holidays.US(years=year)
+    today_holiday = us_holidays.get(datetime.date(year, month, day))
     
-    # Generate Calendar Grid (Sunday start)
+    # Generate Grid
     cal_obj = calendar.TextCalendar(calendar.SUNDAY)
     cal_str = cal_obj.formatmonth(year, month)
     lines = cal_str.splitlines()
     
-    # Format Content
     header = lines[0].strip().upper()
     days_header = " S  M  T  W  T  F  S"
-    body = " \\A ".join(lines[2:])
+    # Filter out empty lines and format for CSS
+    body_lines = [l for l in lines[2:] if l.strip()]
+    body = " \\A ".join(body_lines)
     
-    # Add Holiday Text if it exists
     footer = f"\\A\\A-- {today_holiday} --" if today_holiday else ""
     full_content = f"{header} \\A {days_header} \\A {body} {footer}"
 
-    # Calculate Highlight Position
-    # Sunday = 0, Saturday = 6
-    first_day_weekday = (datetime.date(year, month, 1).weekday() + 1) % 7
-    col = (day + first_day_weekday - 1) % 7
-    row = (day + first_day_weekday - 1) // 7
+    # Calculate Grid Positioning
+    # Sunday is 6 in datetime.weekday(), so (wd + 1) % 7 makes Sun=0
+    first_day_of_month = datetime.date(year, month, 1)
+    start_col = (first_day_of_month.weekday() + 1) % 7
+    
+    col = (day + start_col - 1) % 7
+    row = (day + start_col - 1) // 7
 
+    # Horizontal: 23px is left edge, 29px per column
+    # Vertical: 98px is first row of numbers, 29px per row
     h_pos = 23 + (col * 29)
     v_pos = 98 + (row * 29)
 
