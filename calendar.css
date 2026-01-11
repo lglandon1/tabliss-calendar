@@ -1,0 +1,22 @@
+
+body::before {
+  content: "JANUARY 2026 \A  S  M  T  W  T  F  S \A              1  2  3 \A  4  5  6  7  8  9 10 \A 11 12 13 14 15 16 17 \A 18 19 20 21 22 23 24 \A 25 26 27 28 29 30 31 ";
+  position: fixed;
+  top: 40px;
+  right: 40px;
+  z-index: 999;
+  white-space: pre;
+  font-family: "Courier New", Courier, monospace;
+  font-size: 16px;
+  line-height: 1.8;
+  color: #fff;
+  padding: 25px;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(10px);
+  border-radius: 12px;
+  text-align: center;
+  background-image: radial-gradient(circle, rgba(255, 255, 255, 0.3) 50%, transparent 55%);
+  background-repeat: no-repeat;
+  background-size: 35px 35px;
+  background-position: 23px 156px;
+}
