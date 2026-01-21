@@ -1,8 +1,8 @@
-# 📅 Automated Dracula SVG Calendar for Tabliss
+# :calendar: Automated Dracula SVG Calendar for Tabliss
 
 An automated, smart calendar widget designed specifically for the [Tabliss](https://tabliss.io/) browser extension. This project uses Python and GitHub Actions to generate a daily-updated, Dracula-themed SVG calendar that highlights holidays (US & Kuwait) and weekends.
 
-## 🚀 Features
+## :rocket: Features
 
 * **Smart Layout**: Uses SVG generation to ensure pixel-perfect alignment between dates and highlights.
 * **Dracula Theme**: Features the official Dracula color palette (Pink for today, Purple for holidays, Cyan for weekends).
@@ -32,20 +32,20 @@ To allow the script to save the generated `calendar.css` back to your repository
     ```
     *Note: If changes don't appear immediately, use `.../calendar.css?v=1` to bypass browser cache.*
 
-## 🦁 Brave Browser Troubleshooting
+## :lion: Brave Browser Troubleshooting Brave Browser Troubleshooting
 
 If your settings (including the CSS snippet) disappear when you restart Brave:
 1.  **Disable "Clear on Exit"**: Go to `brave://settings/cookies` and ensure "Clear cookies and site data when you close all windows" is **OFF**.
 2.  **Disable Shields**: Click the Lion icon in the address bar on your Tabliss page and toggle Shields **DOWN**.
 3.  **Persist Settings**: In Tabliss Settings (General), toggle **Persist Settings** to **ON**.
 
-## 📂 File Structure
+## :file_folder: File Structure
 
 * `generate_calendar.py`: The Python engine that calculates dates, fetches holidays, and builds the SVG-encoded CSS.
 * `calendar.css`: The auto-generated file hosted via GitHub Pages.
 * `.github/workflows/daily.yml`: The automation schedule (Cron) that triggers the update.
 
-## 🎨 Customization
+## :gear: Customization
 
 To change the look, edit the `CONFIG` section in `generate_calendar.py`:
 
@@ -55,5 +55,5 @@ To change the look, edit the `CONFIG` section in `generate_calendar.py`:
 | `C_PINK` | The highlight color for the current day |
 | `opacity` | Change from `0.6` to `1.0` in the CSS string for a solid look |
 
-## 📜 License
+## :ledger: License
 MIT License - Feel free to use and modify for your own dashboard!
