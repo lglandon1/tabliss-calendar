@@ -1,28 +1,37 @@
-name: Update Calendar
+name: Update SVG Calendar
+
 on:
   schedule:
+    # Runs at 00:00 UTC every day
     - cron: '0 0 * * *'
-  workflow_dispatch:
+  workflow_dispatch: # Allows you to run it manually for testing
 
 jobs:
   build:
     runs-on: ubuntu-latest
     permissions:
-      contents: write
+      contents: write  # Crucial for pushing changes back to the repo
+
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
       - name: Set up Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
-          python-version: '3.x'
-      - name: Install dependencies
-        run: pip install holidays
-      - name: Run script
-        run: python generate_calendar.py
-      - name: Commit changes
+          python-version: '3.10'
+
+      - name: Install Dependencies
         run: |
-          git config --global user.name 'GitHub Action'
-          git config --global user.email 'action@github.com'
+          python -m pip install --upgrade pip
+          pip install holidays
+
+      - name: Generate Calendar
+        run: python generate_calendar.py
+
+      - name: Commit and Push Changes
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
           git add calendar.css
-          git commit -m "Update calendar" || exit 0
-          git push
+          git diff --quiet && git diff --staged --quiet || (git commit -m "Daily calendar update: $(date +'%Y-%m-%d')" && git push)
